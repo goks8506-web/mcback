@@ -18,7 +18,7 @@ const loginUser = async (req, res) => {
     }
 
     const result = await pool.query(
-      'SELECT * FROM public.user WHERE username = $1 AND password = $2',
+      'SELECT username, type FROM public.user WHERE username = $1 AND password = $2',
       [username, password]
     );
 
@@ -26,17 +26,48 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    res.status(200).json({ 
+    const user = result.rows[0];
+    res.status(200).json({
       message: 'Login successful',
-      username: result.rows[0].username
+      username: user.username,
+      type: user.type,               // <-- crucial for frontend
     });
-
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
+// Register – admin creates users with type
+const registerUser = async (req, res) => {
+  const { username, password, type } = req.body;
+
+  if (!username || !password || !type) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  if (!['admin', 'agent', 'worker'].includes(type)) {
+    return res.status(400).json({ error: 'Invalid user type' });
+  }
+
+  try {
+    const exists = await pool.query('SELECT 1 FROM public.user WHERE username = $1', [username]);
+    if (exists.rows.length > 0) {
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+
+    await pool.query(
+      'INSERT INTO public.user (username, password, type) VALUES ($1, $2, $3)',
+      [username, password, type]
+    );
+
+    res.status(201).json({ message: 'User created successfully' });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
-  loginUser
+  loginUser,registerUser
 };

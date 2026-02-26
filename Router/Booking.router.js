@@ -1,17 +1,23 @@
-// routes/booking.js
+// routes/booking.routes.js
 const express = require('express');
 const router = express.Router();
-const { createBooking, getBookings, getCustomers, searchProductsGlobal} = require('../Controller/Booking.controller');
-const godownController = require('../Controller/Godown.controller');
+const multer = require('multer');
 
-router.post('/godown', godownController.addGodown);
-router.get('/godown', godownController.getGodowns);
-router.delete('/godown/:id', godownController.deleteGodown);
-router.get('/godown/stock/:godown_id', godownController.getStockByGodown);
+const upload = multer({ limits: { fileSize: 60 * 1024 * 1024 } });
+const {
+  createBooking,
+  getAllBookings,
+  getBookingById,
+  getRecentCustomers,
+  getStatesForSupply,
+  getLatestBillNo
+} = require('../Controller/Booking.controller');
 
-router.post('/booking', createBooking);
-router.get('/booking', getBookings);
-router.get('/gcustomers', getCustomers);
-router.get('/search/global', searchProductsGlobal);
+router.post('/bookings', upload.single('pdf'), createBooking);
+router.get('/bookings', getAllBookings);
+router.get('/bookings/:id', getBookingById);
+router.get('/customers/recent', getRecentCustomers);
+router.get('/states', getStatesForSupply);
+router.get('/latest', getLatestBillNo);
 
 module.exports = router;

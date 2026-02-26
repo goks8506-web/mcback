@@ -1,20 +1,27 @@
-// routes/payments.js (unchanged)
+// routes/payments.routes.js
 const express = require('express');
 const router = express.Router();
+
 const ctrl = require('../Controller/Payments.controller');
 
+// Admin & Banks
 router.post('/admins', ctrl.createAdmin);
 router.get('/admins', ctrl.getAdmins);
-router.get('/admins/:id/transactions', ctrl.getAdminTransactions);
-router.post('/admins/bank-accounts', ctrl.addBankAccount);
-router.get('/admins/:username/bank-accounts', ctrl.getBankAccounts);
+router.post('/admins/banks', ctrl.addBankAccount);
+router.get('/admins/:username/banks', ctrl.getBankAccounts);
 
-router.get('/pending', ctrl.getPending);
-router.post('/payment', ctrl.recordPayment);
-router.get('/payments/:id', ctrl.getPaymentHistory);
+// Payments
+router.post('/payments', ctrl.recordPayment);
+router.get('/payments/:id', ctrl.getPaymentsByBooking);
 
-router.get('/sbooking', ctrl.getsBookings);
-router.get('/dispatch_logs/:order_id', ctrl.getDispatchLogs);
-router.get('/transactions/:id', ctrl.getTransactions);
+// Ledger & Reports
+router.get('/ledger', ctrl.getCustomerLedger);
+router.get('/outstanding', ctrl.getOutstandingCustomers);
+router.get('/pendingpay', ctrl.getPending);
+
+// Detailed bookings view (with payments + dispatches)
+router.get('/bookings', ctrl.getBookingsWithDetails);
+// Optional alias if you prefer the old name:
+// router.get('/sbooking', ctrl.getBookingsWithDetails);
 
 module.exports = router;
